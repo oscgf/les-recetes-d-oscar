@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Blog de recetes asturianes" } = Astro.props;
+
+const user = Astro.locals.user || null;
+---
+
+<!DOCTYPE html>
+<html lang="ast">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content={description}>
+  <title>{title} - Les recetes d'Oscar</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+</head>
+<body class="bg-[#f5f1e8] text-[#3e2723] min-h-screen">
+  <header class="bg-[#2d5016] text-white shadow-lg">
+    <nav class="container mx-auto px-4 py-4">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold hover:text-[#d4a574] transition-colors">
+          Les recetes d'Oscar
+        </a>
+        <div class="flex gap-6 items-center">
+          <a href="/" class="hover:text-[#d4a574] transition-colors">Entamu</a>
+          <a href="/anadir" class="hover:text-[#d4a574] transition-colors">Añadir Receta</a>
+          {user ? (
+            <form action="/api/auth/logout" method="POST" class="inline">
+              <button type="submit" class="bg-[#d4a574] text-[#3e2723] px-4 py-2 rounded hover:bg-[#c49564] transition-colors font-semibold">
+                Zarrar sesión
+              </button>
+            </form>
+          ) : (
+            <a href="/login" class="bg-[#d4a574] text-[#3e2723] px-4 py-2 rounded hover:bg-[#c49564] transition-colors font-semibold">
+              Aniciar sesión
+            </a>
+          )}
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <slot />
+  </main>
+
+  <footer class="bg-[#2d5016] text-white mt-16">
+    <div class="container mx-auto px-4 py-6 text-center">
+      <p>&copy; 2026 les recetes d'Oscar. Recetes veganes asturianes feches con amor. 🌱</p>
+    </div>
+  </footer>
+
+  <script>
+    import { supabase } from '../lib/supabase';
+    
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        window.location.reload();
+      }
+    });
+  </script>
+</body>
+</html>

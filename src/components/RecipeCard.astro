@@ -1,0 +1,38 @@
+---
+import type { Receta } from '../lib/supabase';
+
+interface Props {
+  receta: Receta;
+}
+
+const { receta } = Astro.props;
+---
+
+<a 
+  href={`/receta/${receta.id}`} 
+  class="block bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden group"
+>
+  <div class="aspect-video overflow-hidden">
+    <img 
+      src={receta.imaxe_url} 
+      alt={receta.titulu}
+      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+    />
+  </div>
+  <div class="p-4">
+    <h3 class="text-xl font-bold text-[#2d5016] mb-2 group-hover:text-[#d4a574] transition-colors">
+      {receta.titulu}
+    </h3>
+    <div class="flex items-center justify-between text-sm text-gray-600">
+      <span class="bg-[#d4a574] text-white px-3 py-1 rounded-full text-xs font-semibold">
+        {receta.categoria}
+      </span>
+      <span class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {receta.tiempu_preparacion} min
+      </span>
+    </div>
+  </div>
+</a>

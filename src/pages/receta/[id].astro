@@ -1,0 +1,96 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getReceteById } from '../../lib/supabase';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect('/');
+}
+
+const receta = await getReceteById(id);
+
+if (!receta) {
+  return Astro.redirect('/');
+}
+---
+
+<MainLayout title={receta.titulu}>
+  <div class="max-w-4xl mx-auto">
+    <a 
+      href="/" 
+      class="inline-flex items-center text-[#2d5016] hover:text-[#d4a574] mb-6 font-semibold"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Volver al entamu
+    </a>
+
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div class="aspect-video w-full overflow-hidden">
+        <img 
+          src={receta.imaxe_url} 
+          alt={receta.titulu}
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <div class="p-8">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-4xl font-bold text-[#2d5016]">
+            {receta.titulu}
+          </h1>
+          <span class="bg-[#d4a574] text-white px-4 py-2 rounded-full font-semibold">
+            {receta.categoria}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 text-gray-600 mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="font-semibold">{receta.tiempu_preparacion} minutos</span>
+        </div>
+
+        <div class="mb-8">
+          <p class="text-lg text-gray-700 leading-relaxed">
+            {receta.descripcion}
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <h2 class="text-2xl font-bold text-[#2d5016] mb-4">Ingredientes</h2>
+            <ul class="space-y-2">
+              {receta.ingredientes.map((ingrediente) => (
+                <li class="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#d4a574] mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="text-gray-700">{ingrediente}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h2 class="text-2xl font-bold text-[#2d5016] mb-4">Preparación</h2>
+            <ol class="space-y-4">
+              {receta.pasos.map((paso, index) => (
+                <li class="flex items-start">
+                  <span class="shrink-0 w-8 h-8 bg-[#2d5016] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                    {index + 1}
+                  </span>
+                  <span class="text-gray-700 pt-1">{paso}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainLayout>

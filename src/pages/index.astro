@@ -1,0 +1,50 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import RecipeCard from '../components/RecipeCard.astro';
+import CategoryFilter from '../components/CategoryFilter.astro';
+import { getRecetes, getRecetesByCategoria } from '../lib/supabase';
+
+export const prerender = false;
+
+const url = new URL(Astro.request.url);
+const categoria = url.searchParams.get('categoria');
+
+let recetes;
+if (categoria) {
+  recetes = await getRecetesByCategoria(categoria);
+} else {
+  recetes = await getRecetes();
+}
+---
+
+<MainLayout title="Entamu">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold text-[#2d5016] mb-4">
+        Bienveníu a <span class="text-[#d4a574]">Les recetes d'Oscar</span>
+      </h1>
+      <p class="text-xl text-gray-600 mb-2">
+        Tu blog de recetes <span class="text-[#2d5016] font-bold">veganes</span> de confianza
+      </p>
+    </div>
+
+    <CategoryFilter currentCategory={categoria || undefined} />
+
+    {recetes.length === 0 ? (
+      <div class="text-center py-16">
+        <p class="text-xl text-gray-600">
+          Entá nun hai recetes. {' '}
+          <a href="/anadir" class="text-[#2d5016] font-semibold hover:text-[#d4a574]">
+            ¡Añade la primera!
+          </a>
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {recetes.map((receta) => (
+          <RecipeCard receta={receta} />
+        ))}
+      </div>
+    )}
+  </div>
+</MainLayout>

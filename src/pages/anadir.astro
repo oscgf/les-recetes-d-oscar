@@ -1,0 +1,206 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { getUser } from '../lib/auth';
+
+const user = await getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+---
+
+<MainLayout title="Añadir Receta">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <h1 class="text-3xl font-bold text-[#2d5016] mb-2">Añadir Receta Vegana Nueva</h1>
+      <p class="text-gray-600 mb-6 flex items-center gap-2">
+        <span class="text-xl">🌱</span>
+        Recuerda qu'esta receta tien que ser 100% vegana (ensin ingredientes d'orixe animal)
+      </p>
+      
+      <form id="recetaForm" class="space-y-6">
+        <div>
+          <label for="titulu" class="block text-sm font-semibold mb-2">Títulu de la receta</label>
+          <input
+            type="text"
+            id="titulu"
+            name="titulu"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+            placeholder="Ej: Fabada asturiana"
+          />
+        </div>
+
+        <div>
+          <label for="descripcion" class="block text-sm font-semibold mb-2">Descripción</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            required
+            rows="3"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+            placeholder="Una descripción curtia de la receta..."
+          ></textarea>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="categoria" class="block text-sm font-semibold mb-2">Categoría</label>
+            <select
+              id="categoria"
+              name="categoria"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+            >
+              <option value="">Seleiciona una categoría</option>
+              <option value="Primeros">Primeros</option>
+              <option value="Segundos">Segundos</option>
+              <option value="Postres">Postres</option>
+              <option value="Bebíes">Bebíes</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="tiempu_preparacion" class="block text-sm font-semibold mb-2">Tiempu (minutos)</label>
+            <input
+              type="number"
+              id="tiempu_preparacion"
+              name="tiempu_preparacion"
+              required
+              min="1"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+              placeholder="60"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="ingredientes" class="block text-sm font-semibold mb-2">
+            Ingredientes (un por llinia)
+          </label>
+          <textarea
+            id="ingredientes"
+            name="ingredientes"
+            required
+            rows="6"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+            placeholder="500g de fabes&#10;200g de chorizu&#10;150g de morcilla&#10;..."
+          ></textarea>
+        </div>
+
+        <div>
+          <label for="pasos" class="block text-sm font-semibold mb-2">
+            Pasos de preparación (un por llinia)
+          </label>
+          <textarea
+            id="pasos"
+            name="pasos"
+            required
+            rows="8"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+            placeholder="Dexa les fabes a remoyu la nueche anterior&#10;Cuez les fabes con agua fría&#10;Añade'l chorizu y la morcilla&#10;..."
+          ></textarea>
+        </div>
+
+        <div>
+          <label for="imaxe" class="block text-sm font-semibold mb-2">Imaxe de la receta</label>
+          <input
+            type="file"
+            id="imaxe"
+            name="imaxe"
+            accept="image/*"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2d5016] focus:border-transparent"
+          />
+          <p class="text-sm text-gray-500 mt-1">Formatos permitíos: JPG, PNG, WebP</p>
+        </div>
+
+        <div class="flex gap-4">
+          <button
+            type="submit"
+            id="submitBtn"
+            class="flex-1 bg-[#2d5016] text-white py-3 rounded-lg font-semibold hover:bg-[#3d6026] transition-colors"
+          >
+            Guardar Receta
+          </button>
+          <a
+            href="/"
+            class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors text-center"
+          >
+            Encaboxar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import { createReceta, uploadImaxe } from '../lib/supabase';
+  import { getUser } from '../lib/auth';
+
+  const form = document.getElementById('recetaForm') as HTMLFormElement;
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Guardando...';
+
+    try {
+      const formData = new FormData(form);
+      
+      const titulu = formData.get('titulu') as string;
+      const descripcion = formData.get('descripcion') as string;
+      const categoria = formData.get('categoria') as 'Primeros' | 'Segundos' | 'Postres' | 'Bebíes';
+      const tiempu_preparacion = parseInt(formData.get('tiempu_preparacion') as string);
+      const ingredientesText = formData.get('ingredientes') as string;
+      const pasosText = formData.get('pasos') as string;
+      const imaxeFile = formData.get('imaxe') as File;
+
+      const ingredientes = ingredientesText.split('\n').filter(i => i.trim());
+      const pasos = pasosText.split('\n').filter(p => p.trim());
+
+      const user = await getUser();
+      if (!user) {
+        alert('Tienes qu\'aniciar sesión pa añadir recetes');
+        window.location.href = '/login';
+        return;
+      }
+
+      const imaxe_url = await uploadImaxe(imaxeFile);
+      if (!imaxe_url) {
+        alert('Error al xubir la imaxe');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Guardar Receta';
+        return;
+      }
+
+      const receta = await createReceta({
+        titulu,
+        descripcion,
+        categoria,
+        tiempu_preparacion,
+        ingredientes,
+        pasos,
+        imaxe_url,
+        user_id: user.id,
+      });
+
+      if (receta) {
+        alert('¡Receta guardada con ésitu!');
+        window.location.href = '/';
+      } else {
+        alert('Error al guardar la receta');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Guardar Receta';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hebo un error al guardar la receta');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Guardar Receta';
+    }
+  });
+</script>

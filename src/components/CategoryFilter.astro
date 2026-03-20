@@ -1,0 +1,24 @@
+---
+interface Props {
+  currentCategory?: string;
+}
+
+const { currentCategory } = Astro.props;
+
+const categories = ['Toes', 'Primeros', 'Segundos', 'Postres', 'Bebíes'];
+---
+
+<div class="flex flex-wrap gap-3 mb-8">
+  {categories.map((category) => (
+    <a
+      href={category === 'Toes' ? '/' : `/?categoria=${category}`}
+      class={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+        (category === 'Toes' && !currentCategory) || currentCategory === category
+          ? 'bg-[#2d5016] text-white'
+          : 'bg-white text-[#2d5016] hover:bg-[#d4a574] hover:text-white'
+      }`}
+    >
+      {category}
+    </a>
+  ))}
+</div>
