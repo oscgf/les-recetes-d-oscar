@@ -7,8 +7,6 @@ interface Props {
 }
 
 const { title, description = "Blog de recetes asturianes" } = Astro.props;
-
-const user = Astro.locals.user || null;
 ---
 
 <!DOCTYPE html>
@@ -29,18 +27,6 @@ const user = Astro.locals.user || null;
         </a>
         <div class="flex gap-6 items-center">
           <a href="/" class="hover:text-[#d4a574] transition-colors">Entamu</a>
-          <a href="/anadir" class="hover:text-[#d4a574] transition-colors">Añadir Receta</a>
-          {user ? (
-            <form action="/api/auth/logout" method="POST" class="inline">
-              <button type="submit" class="bg-[#d4a574] text-[#3e2723] px-4 py-2 rounded hover:bg-[#c49564] transition-colors font-semibold">
-                Zarrar sesión
-              </button>
-            </form>
-          ) : (
-            <a href="/login" class="bg-[#d4a574] text-[#3e2723] px-4 py-2 rounded hover:bg-[#c49564] transition-colors font-semibold">
-              Aniciar sesión
-            </a>
-          )}
         </div>
       </div>
     </nav>
@@ -56,14 +42,5 @@ const user = Astro.locals.user || null;
     </div>
   </footer>
 
-  <script>
-    import { supabase } from '../lib/supabase';
-    
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        window.location.reload();
-      }
-    });
-  </script>
 </body>
 </html>
