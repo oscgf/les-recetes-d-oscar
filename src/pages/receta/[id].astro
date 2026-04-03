@@ -15,6 +15,9 @@ const receta = await getReceteById(id);
 if (!receta) {
   return Astro.redirect('/');
 }
+
+const pasos: string[][] = receta.pasos;
+const isMultiOption = pasos.length > 1;
 ---
 
 <MainLayout title={receta.titulu}>
@@ -78,19 +81,67 @@ if (!receta) {
 
           <div>
             <h2 class="text-2xl font-bold text-[#2d5016] mb-4">Preparación</h2>
-            <ol class="space-y-4">
-              {receta.pasos.map((paso, index) => (
-                <li class="flex items-start">
-                  <span class="shrink-0 w-8 h-8 bg-[#2d5016] text-white rounded-full flex items-center justify-center font-bold mr-3">
-                    {index + 1}
-                  </span>
-                  <span class="text-gray-700 pt-1">{paso}</span>
-                </li>
-              ))}
-            </ol>
+{!isMultiOption && (
+              <ol class="space-y-4">
+                {pasos[0].map((paso: string, index: number) => (
+                  <li class="flex items-start">
+                    <span class="shrink-0 w-8 h-8 bg-[#2d5016] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                      {index + 1}
+                    </span>
+                    <span class="text-gray-700 pt-1">{paso}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {isMultiOption && (
+              <div id="steps-tabs">
+                <div class="flex gap-2 mb-4 border-b border-gray-200">
+                  {pasos.map((_: string[], i: number) => (
+                    <button
+                      class={`tab-btn px-4 py-2 font-semibold rounded-t-lg border-b-2 transition-colors ${i === 0 ? 'border-[#2d5016] text-[#2d5016]' : 'border-transparent text-gray-500 hover:text-[#2d5016]'}`}
+                      data-tab={String(i)}
+                    >
+                      Opción {i + 1}
+                    </button>
+                  ))}
+                </div>
+                {pasos.map((opcion: string[], i: number) => (
+                  <ol class={`tab-panel space-y-4 ${i !== 0 ? 'hidden' : ''}`} data-panel={String(i)}>
+                    {opcion.map((paso: string, index: number) => (
+                      <li class="flex items-start">
+                        <span class="shrink-0 w-8 h-8 bg-[#2d5016] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                          {index + 1}
+                        </span>
+                        <span class="text-gray-700 pt-1">{paso}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   </div>
 </MainLayout>
+
+<script>
+  const tabBtns = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+  const tabPanels = document.querySelectorAll<HTMLElement>('.tab-panel');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      tabBtns.forEach(b => {
+        b.classList.remove('border-[#2d5016]', 'text-[#2d5016]');
+        b.classList.add('border-transparent', 'text-gray-500');
+      });
+      btn.classList.add('border-[#2d5016]', 'text-[#2d5016]');
+      btn.classList.remove('border-transparent', 'text-gray-500');
+      tabPanels.forEach(panel => {
+        panel.classList.toggle('hidden', panel.dataset.panel !== target);
+      });
+    });
+  });
+</script>

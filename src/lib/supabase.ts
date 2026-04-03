@@ -14,9 +14,9 @@ export interface Receta {
   titulu: string;
   descripcion: string;
   ingredientes: string[];
-  pasos: string[];
+  pasos: string[][];
   tiempu_preparacion: number;
-  categoria: 'Primeros' | 'Segundos' | 'Postres' | 'Bebíes';
+  categoria: 'Llegumes' | 'Verdures' | 'Cereales' | 'Setes' | 'Fruta' | 'Tofu y otros' | 'Untables';
   imaxe_url: string;
   user_id: string;
   created_at: string;
